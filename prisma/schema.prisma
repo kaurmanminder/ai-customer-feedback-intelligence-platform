@@ -1,0 +1,108 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  ANALYST
+  VIEWER
+}
+
+enum Sentiment {
+  POS
+  NEU
+  NEG
+}
+
+enum FeedbackStatus {
+  NEW
+  REVIEWED
+  ACTIONED
+}
+
+model Workspace {
+  id        String     @id @default(cuid())
+  name      String
+  createdAt DateTime   @default(now())
+  users     User[]
+  feedbacks Feedback[]
+  themes    Theme[]
+  reports   Report[]
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String?
+  email        String     @unique
+  passwordHash String
+  phoneNumber  String
+  role         Role       @default(VIEWER)
+  bio          String?    @db.Text
+  workspaceId  String
+  workspace    Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  reports      Report[]
+  createdAt    DateTime   @default(now())
+}
+
+model Feedback {
+  id             String          @id @default(cuid())
+  content        String          @db.MediumText
+  channel        String
+  sourceRef      String?
+  customerLabel  String?
+  sentiment      Sentiment
+  sentimentScore Float
+  status         FeedbackStatus  @default(NEW)
+  createdAt      DateTime        @default(now())
+  workspaceId    String
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  themes         FeedbackTheme[]
+  embedding      Embedding?
+}
+
+model Theme {
+  id          String          @id @default(cuid())
+  name        String
+  description String?         @db.Text
+  color       String
+  workspaceId String
+  workspace   Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  feedbacks   FeedbackTheme[]
+
+  @@unique([name, workspaceId])
+}
+
+model FeedbackTheme {
+  feedbackId String
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  themeId    String
+  theme      Theme    @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  confidence Float
+
+  @@id([feedbackId, themeId])
+}
+
+model Embedding {
+  id         String   @id @default(cuid())
+  feedbackId String   @unique
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  vector     Json     // Stored as a JSON array of floats [f1, f2, f3, ...]
+}
+
+model Report {
+  id             String    @id @default(cuid())
+  title          String
+  periodStart    DateTime
+  periodEnd      DateTime
+  contentJson    Json
+  createdAt      DateTime  @default(now())
+  workspaceId    String
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  generatedById  String
+  generatedBy    User      @relation(fields: [generatedById], references: [id])
+}

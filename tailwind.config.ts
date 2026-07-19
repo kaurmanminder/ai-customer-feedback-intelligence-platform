@@ -11,6 +11,10 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        neon: "#deff9a",
+      },
+      fontFamily: {
+        sans: ["var(--font-sans)", "sans-serif"],
       },
     },
   },

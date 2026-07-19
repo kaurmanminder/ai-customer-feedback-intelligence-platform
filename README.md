@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project LOOP - AI Customer-Feedback Intelligence Platform
+### 🚀 Zidio Internship Capstone Project Submission
 
-## Getting Started
+Welcome to **Project LOOP**, a state-of-the-art enterprise-grade AI Customer-Feedback Intelligence Platform built as the official Zidio Internship Capstone project. Project LOOP is designed to centralize, process, classify, and visualize multi-channel user reviews in real-time, leveraging modern AI and transaction-safe relational database synchronization.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 💡 System Architecture
+
+```mermaid
+graph TD
+    A[Multi-Channel Ingestion: Web, Email, Slack, Intercom, Mobile] -->|POST Raw Feedback| B[Next.js API Gateway: route.ts]
+    B -->|Session Guard: loop_session Cookie verification| B
+    B -->|Official @google/generative-ai SDK call| C[Google Gemini 1.5 Flash AI Processing]
+    C -->|Return Sentiment, Score, Summary & Tags JSON| B
+    B -->|Multi-Tenant Transaction Write| D[MySQL / PostgreSQL Database via Prisma Client]
+    D -->|Real-time state broadcast| E[Tailwind UI & Recharts Dashboard Client]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Ingestion Layer**: Aggregates customer text reviews from web interfaces or external integrations.
+2. **Next.js API Guard**: Safe Route Handler (`/api/analyze`) validates base64 session security credentials, extracts dynamic client contexts, and ensures strict multi-tenant workspace isolation.
+3. **Google Gemini 1.5 Flash**: Processes raw customer voice contents via the official Google Generative AI SDK, parsing categories, sentiment classifications ('Positive', 'Neutral', 'Negative'), and one-line summaries.
+4. **Prisma Relational Storage**: Stores analysis results securely in database tables using MySQL/PostgreSQL relational schema rules, ensuring zero data loss and flawless integrity.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Tech Stack Specification
 
-## Learn More
+- **Frontend**: Next.js 14 App Router, TypeScript, React 18, Recharts.
+- **Styling**: Tailwind CSS with custom premium `#deff9a` neon-green themes and responsive layouts (`flex-col md:flex-row`, `overflow-x-hidden`).
+- **Database & ORM**: Prisma ORM with MySQL/PostgreSQL support.
+- **AI Integration**: Official `@google/generative-ai` SDK wrapper using model `gemini-1.5-flash`.
+- **Security**: Cookie-based custom encryption session (`loop_session`).
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ⚙️ Step-by-Step Local Setup & Setup Instructions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Prepare your local database (e.g. MySQL) and configure `.env` database URLs and Gemini key values. Then, execute these setup scripts in your terminal:
 
-## Deploy on Vercel
+```bash
+# 1. Install project dependencies
+npm install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# 2. Synchronize Prisma schemas to create database tables
+npx prisma db push --force-reset
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# 3. Seed mock workspaces, customized user roles, and reviews
+npx prisma db seed
+
+# 4. Start Next.js development server
+npm run dev
+```
+
+After launching, go to [http://localhost:3000](http://localhost:3000) to access the application.
+
+---
+
+## 🔐 Environment Variables Guide
+
+Create a `.env` file in the root directory of the project. It must contain the database connection string and your Google Gemini API Key:
+```env
+DATABASE_URL="mysql://root:rootpassword@localhost:3306/loop_db"
+GEMINI_API_KEY="YOUR_GEMINI_API_KEY_HERE"
+```
+
+---
+
+## 👥 Grading & Evaluation Credentials Checklist
+
+Authenticate seamlessly using these pre-seeded roles to evaluate all multi-tenant layout rights. The default password is `password123`:
+
+### 1. ADMIN ROLE (Full settings, profiles, and dashboard analysis write access)
+* **Email**: `admin@example.com`
+* **Password**: `password123`
+* **Phone Number**: `+15555551234`
+
+### 2. ANALYST ROLE (Analysis and review summary access)
+* **Email**: `analyst@example.com`
+* **Password**: `password123`
+* **Phone Number**: `+15555555678`
+
+### 3. VIEWER ROLE (Read-only insights lookup)
+* **Email**: `viewer@example.com`
+* **Password**: `password123`
+* **Phone Number**: `+15555559012`
