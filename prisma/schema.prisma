@@ -104,5 +104,5 @@ model Report {
   workspaceId    String
   workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   generatedById  String
-  generatedBy    User      @relation(fields: [generatedById], references: [id])
+  generatedBy    User      @relation(fields: [generatedById], references: [id], onDelete: Cascade)
 }
